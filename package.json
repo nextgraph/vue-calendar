@@ -1,5 +1,5 @@
 {
-    "name": "vx-components",
+    "name": "cvx-components",
     "version": "1.0.0",
     "main": "src/index.js",
     "scripts": {
@@ -23,5 +23,21 @@
         "less": "^3.9.0",
         "less-loader": "^4.1.0",
         "vue-template-compiler": "^2.6.10"
-    }
+    },
+    "description": "common vue.js components",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nextgraph/vx-components.git"
+    },
+    "keywords": [
+        "vue",
+        "component",
+        "calendar"
+    ],
+    "author": "huangqi",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/nextgraph/vx-components/issues"
+    },
+    "homepage": "https://github.com/nextgraph/vx-components#readme"
 }

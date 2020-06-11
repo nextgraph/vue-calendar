@@ -1,2 +1,2 @@
-# vue-calendar
-a vue calendar for web
+# CVX
+common vue.js components
