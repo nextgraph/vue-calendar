@@ -1,19 +1,20 @@
 <template>
     <div id="app">
+        <calendar></calendar>
     </div>
 </template>
 <script>
+import Calendar from './components'
 export default {
     name: 'app',
     components: {
+        Calendar
     },
     data() {
         return {}
     },
-    methods: {
-
-    }
-};
+    methods: {}
+}
 </script>
 <style>
 html,
