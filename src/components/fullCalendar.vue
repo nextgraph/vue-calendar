@@ -5,6 +5,7 @@
             :current-date="currentDate"
             :title-format="titleFormat"
             :first-day="firstDay"
+            :current-month="currentMonth"
             :month-names="monthNames"
             @change="emitChangeMonth"
         >
@@ -37,8 +38,10 @@
 import langSets from './dataMap/langSets'
 import FcBody from './components/body'
 import FcHeader from './components/header'
+import dayjs from 'dayjs'
 
 export default {
+    name: 'VxCalendar',
     props: {
         events: {
             // events will be displayed on calendar
@@ -49,7 +52,7 @@ export default {
         },
         lang: {
             type: String,
-            default: 'en'
+            default: 'zh'
         },
         firstDay: {
             type: Number | String,
@@ -57,7 +60,7 @@ export default {
                 let res = parseInt(val)
                 return res >= 0 && res <= 6
             },
-            default: 0
+            default: 1
         },
         titleFormat: {
             type: String,
@@ -79,6 +82,10 @@ export default {
                     .slice(this.firstDay)
                     .concat(arr.slice(0, this.firstDay))
             }
+        },
+        currentMonth: {
+            type: String,
+            default: dayjs().format('YYYY-MM')
         }
     },
     data() {
@@ -88,9 +95,7 @@ export default {
     },
     methods: {
         emitChangeMonth(start, end, currentStart, current) {
-            console.log('currentDate 2', this.currentDate)
             this.currentDate = current
-            console.log('currentDate 3', this.currentDate)
             this.$emit('changeMonth', start, end, currentStart)
         },
         emitEventClick(event, jsEvent, pos) {

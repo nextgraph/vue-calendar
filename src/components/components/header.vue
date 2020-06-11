@@ -15,12 +15,14 @@
 </template>
 <script type="text/babel">
 import dateFunc from './dateFunc'
+import dayjs from 'dayjs'
 
 export default {
     created() {
         this.dispatchEvent()
     },
     props: {
+        currentMonth: '',
         currentDate: {},
         titleFormat: {},
         firstDay: {},
@@ -31,7 +33,7 @@ export default {
             title: '',
             leftArrow: '<',
             rightArrow: '>',
-            headDate: new Date()
+            headDate: this.changeMonth(new Date(), dayjs(this.currentMonth + '-02').month() - dayjs().month())
         }
     },
     watch: {
@@ -39,7 +41,6 @@ export default {
             if (!val) return
             this.headDate = val
             console.log('currentDate', val)
-            // this.headDate = JSON.parse(JSON.stringify(val))
         }
     },
     methods: {
@@ -56,6 +57,7 @@ export default {
             return new Date(dt.setMonth(dt.getMonth() + num))
         },
         dispatchEvent() {
+            console.log('dispatchEvent')
             this.title = dateFunc.format(
                 this.headDate,
                 this.titleFormat,

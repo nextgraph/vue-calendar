@@ -1,5 +1,7 @@
+import VxCalendar from './components'
+
 const install = function(Vue, opts = {}) {
-//    Vue.component(VTable.name, VTable);
+    Vue.component(VxCalendar.name, VxCalendar);
 }
 
 // auto install
@@ -8,4 +10,5 @@ if (typeof window !== 'undefined' && window.Vue) {
 }
 
 export default {
-    install};
+    install
+};

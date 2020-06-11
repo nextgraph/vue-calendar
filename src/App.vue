@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <calendar></calendar>
+        <calendar currentMonth="2020-10"></calendar>
     </div>
 </template>
 <script>
