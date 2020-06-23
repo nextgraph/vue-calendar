@@ -26,7 +26,11 @@ export default {
         currentDate: {},
         titleFormat: {},
         firstDay: {},
-        monthNames: {}
+        monthNames: {},
+        canChangeMonth: {
+            type: Boolean,
+            default: true
+        }
     },
     data() {
         return {
@@ -45,10 +49,12 @@ export default {
     },
     methods: {
         goPrev() {
+            if (!this.canChangeMonth) return
             this.headDate = this.changeMonth(this.headDate, -1)
             this.dispatchEvent()
         },
         goNext() {
+            if (!this.canChangeMonth) return
             this.headDate = this.changeMonth(this.headDate, 1)
             this.dispatchEvent()
         },

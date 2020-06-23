@@ -7,6 +7,7 @@
             :first-day="firstDay"
             :current-month="currentMonth"
             :month-names="monthNames"
+            :can-change-month="canChangeMonth"
             @change="emitChangeMonth"
         >
             <div slot="header-left">
@@ -86,6 +87,11 @@ export default {
         currentMonth: {
             type: String,
             default: dayjs().format('YYYY-MM')
+        },
+
+        canChangeMonth: {
+            type: Boolean,
+            default: true
         }
     },
     data() {
