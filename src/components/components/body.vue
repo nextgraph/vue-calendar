@@ -1,50 +1,66 @@
 <template>
     <div class="full-calendar-body">
         <div class="weeks">
-            <strong class="week" v-for="week in weekNames">{{week}}</strong>
+            <strong
+                class="week"
+                v-for="week in weekNames"
+            >{{week}}</strong>
         </div>
-        <div class="dates" ref="dates">
+        <div
+            class="dates"
+            ref="dates"
+        >
             <div class="dates-bg">
-                <div class="week-row" v-for="week in currentDates">
+                <div
+                    class="week-row"
+                    v-for="week in currentDates"
+                >
                     <div
-                        class="day-cell"
-                        v-for="day in week"
                         :class="{'today' : day.isToday,
               'not-cur-month' : !day.isCurMonth}"
+                        :key="'day_'+index"
+                        class="day-cell"
+                        v-for="(day, index) in week"
                     >
-                        <p class="day-number">{{day.monthDay}}</p>
+                        <p
+                            :class="{'currDayClick': handleBg(day.date),'disableDay': handleDisableDay(day.date)}"
+                            class="day-number"
+                        >{{day.monthDay}}</p>
                     </div>
                 </div>
             </div>
 
             <!-- absolute so we can make dynamic td -->
             <div class="dates-events">
-                <div class="events-week" v-for="week in currentDates">
+                <div
+                    class="events-week"
+                    v-for="week in currentDates"
+                >
                     <div
-                        class="events-day"
-                        v-for="day in week"
-                        track-by="$index"
                         :class="{'today' : day.isToday,
               'not-cur-month' : !day.isCurMonth}"
-                        @click.stop="dayClick(day.date, $event)"
+                        @click.stop="dayClick(day.date, day, $event)"
+                        class="events-day"
+                        track-by="$index"
+                        v-for="day in week"
                     >
                         <p class="day-number">{{day.monthDay}}</p>
                         <div class="event-box">
                             <p
-                                class="event-item"
-                                v-for="event in day.events"
-                                v-show="event.cellIndex <= eventLimit"
                                 :class="[classNames(event.cssClass), {
                   'is-start'   : isStart(event.start, day.date),
                   'is-end'     : isEnd(event.end,day.date),
                   'is-opacity' : !event.isShow
                   }]"
                                 @click="eventClick(event,$event)"
+                                class="event-item"
+                                v-for="event in day.events"
+                                v-show="event.cellIndex <= eventLimit"
                             >{{isBegin(event, day.date, day.weekDay)}}</p>
                             <p
-                                v-if="day.events.length > eventLimit"
-                                class="more-link"
                                 @click.stop="selectThisDay(day, $event)"
+                                class="more-link"
+                                v-if="day.events.length > eventLimit"
                             >+ {{day.events[day.events.length -1].cellIndex - eventLimit}} more</p>
                         </div>
                     </div>
@@ -53,21 +69,24 @@
 
             <!-- full events when click show more -->
             <div
+                :style="{left: morePos.left + 'px', top: morePos.top + 'px'}"
                 class="more-events"
                 v-show="showMore"
-                :style="{left: morePos.left + 'px', top: morePos.top + 'px'}"
             >
                 <div class="more-header">
                     <span class="title">{{moreTitle(selectDay.date)}}</span>
-                    <span class="close" @click.stop="showMore = false">x</span>
+                    <span
+                        @click.stop="showMore = false"
+                        class="close"
+                    >x</span>
                 </div>
                 <div class="more-body">
                     <ul class="body-list">
                         <li
+                            @click="eventClick(event,$event)"
+                            class="body-item"
                             v-for="event in selectDay.events"
                             v-show="event.isShow"
-                            class="body-item"
-                            @click="eventClick(event,$event)"
                         >{{event.title}}</li>
                     </ul>
                 </div>
@@ -79,14 +98,24 @@
 </template>
 <script type="text/babel">
 import dateFunc from './dateFunc'
+import dayjs from 'dayjs'
 
 export default {
+    inject: {
+        disableDays: {
+            default() {
+                return []
+            }
+        }
+    },
     props: {
         currentDate: {},
         events: {},
         weekNames: {
             type: Array,
-            default: []
+            default(){
+                return []
+            }
         },
         monthNames: {},
         firstDay: {}
@@ -110,7 +139,8 @@ export default {
                 top: 0,
                 left: 0
             },
-            selectDay: {}
+            selectDay: {},
+            clickCache: []
         }
     },
     watch: {
@@ -253,8 +283,24 @@ export default {
                 top: eventRect.top + eventRect.height - pageRect.top
             }
         },
-        dayClick(day, jsEvent) {
+        dayClick(day, item, jsEvent) {
+            let date = dayjs(day).format('YYYY-MM-DD')
+            if (this.disableDays.includes(date)) return
+            if (this.clickCache.includes(date)) {
+                let index = this.clickCache.findIndex(ele => ele === date)
+                this.clickCache.splice(index, 1)
+            } else {
+                this.clickCache.push(date)
+            }
             this.$emit('dayclick', day, jsEvent)
+        },
+        handleBg(day) {
+            let date = dayjs(day).format('YYYY-MM-DD')
+            return this.clickCache.includes(date)
+        },
+        handleDisableDay(day) {
+            let date = dayjs(day).format('YYYY-MM-DD')
+            return this.disableDays.includes(date)
         },
         eventClick(event, jsEvent) {
             if (!event.isShow) {
@@ -270,6 +316,13 @@ export default {
 <style lang="less">
 .full-calendar-body {
     margin-top: 20px;
+    .currDayClick {
+        background: #0090fe;
+        color: #fff;
+    }
+    .disableDay {
+        background: #E8E8E8;
+    }
     .weeks {
         display: flex;
         border-top: 1px solid #e0e0e0;
@@ -290,12 +343,17 @@ export default {
             display: flex;
             .day-cell {
                 flex: 1;
-                min-height: 100px;
+                min-height: 50px;
                 padding: 4px;
                 border-right: 1px solid #e0e0e0;
                 border-bottom: 1px solid #e0e0e0;
                 .day-number {
-                    text-align: right;
+                    text-align: center;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    line-height: 30px;
                 }
                 &.today {
                     background-color: #fcf8e3;
@@ -318,13 +376,18 @@ export default {
                 .events-day {
                     cursor: pointer;
                     flex: 1;
-                    min-height: 109px;
+                    min-height: 59px;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     .day-number {
-                        text-align: right;
+                        text-align: center;
                         padding: 4px 5px 4px 4px;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
                         opacity: 0;
+                        margin: 0 auto;
+                        line-height: 30px;
                     }
                     &.not-cur-month {
                         .day-number {
