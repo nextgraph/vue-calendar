@@ -398,7 +398,7 @@ export default {
                         .event-item {
                             cursor: pointer;
                             font-size: 12px;
-                            background-color: #c7e6fd;
+                            /*background-color: #c7e6fd;*/
                             margin-bottom: 2px;
                             color: rgba(0, 0, 0, 0.87);
                             padding: 0 0 0 4px;

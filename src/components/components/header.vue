@@ -4,9 +4,9 @@
             <slot name="header-left"></slot>
         </div>
         <div class="header-center">
-            <span class="prev-month" @click.stop="goPrev">{{leftArrow}}</span>
+<!--            <span class="prev-month" @click.stop="goPrev">{{leftArrow}}</span>-->
             <span class="title">{{title}}</span>
-            <span class="next-month" @click.stop="goNext">{{rightArrow}}</span>
+<!--            <span class="next-month" @click.stop="goNext">{{rightArrow}}</span>-->
         </div>
         <div class="header-right">
             <slot name="header-right"></slot>
@@ -48,16 +48,16 @@ export default {
         }
     },
     methods: {
-        goPrev() {
-            if (!this.canChangeMonth) return
-            this.headDate = this.changeMonth(this.headDate, -1)
-            this.dispatchEvent()
-        },
-        goNext() {
-            if (!this.canChangeMonth) return
-            this.headDate = this.changeMonth(this.headDate, 1)
-            this.dispatchEvent()
-        },
+        // goPrev() {
+        //     if (!this.canChangeMonth) return
+        //     this.headDate = this.changeMonth(this.headDate, -1)
+        //     this.dispatchEvent()
+        // },
+        // goNext() {
+        //     if (!this.canChangeMonth) return
+        //     this.headDate = this.changeMonth(this.headDate, 1)
+        //     this.dispatchEvent()
+        // },
         changeMonth(date, num) {
             let dt = new Date(date)
             return new Date(dt.setMonth(dt.getMonth() + num))
