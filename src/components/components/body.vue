@@ -1,20 +1,11 @@
 <template>
     <div class="full-calendar-body">
         <div class="weeks">
-            <strong
-                class="week"
-                v-for="week in weekNames"
-            >{{week}}</strong>
+            <strong class="week" v-for="week in weekNames">{{week}}</strong>
         </div>
-        <div
-            class="dates"
-            ref="dates"
-        >
+        <div class="dates" ref="dates">
             <div class="dates-bg">
-                <div
-                    class="week-row"
-                    v-for="week in currentDates"
-                >
+                <div class="week-row" v-for="week in currentDates">
                     <div
                         :class="{'today' : day.isToday,
               'not-cur-month' : !day.isCurMonth}"
@@ -32,10 +23,7 @@
 
             <!-- absolute so we can make dynamic td -->
             <div class="dates-events">
-                <div
-                    class="events-week"
-                    v-for="week in currentDates"
-                >
+                <div class="events-week" v-for="week in currentDates">
                     <div
                         :class="{'today' : day.isToday,
               'not-cur-month' : !day.isCurMonth}"
@@ -55,7 +43,7 @@
                                 @click="eventClick(event,$event)"
                                 class="event-item"
                                 v-for="event in day.events"
-                                v-show="event.cellIndex <= eventLimit"
+                                v-show="event.isShow && event.cellIndex <= eventLimit"
                             >{{isBegin(event, day.date, day.weekDay)}}</p>
                             <p
                                 @click.stop="selectThisDay(day, $event)"
@@ -75,10 +63,7 @@
             >
                 <div class="more-header">
                     <span class="title">{{moreTitle(selectDay.date)}}</span>
-                    <span
-                        @click.stop="showMore = false"
-                        class="close"
-                    >x</span>
+                    <span @click.stop="showMore = false" class="close">x</span>
                 </div>
                 <div class="more-body">
                     <ul class="body-list">
@@ -101,19 +86,13 @@ import dateFunc from './dateFunc'
 import dayjs from 'dayjs'
 
 export default {
-    inject: {
-        disableDays: {
-            default() {
-                return []
-            }
-        }
-    },
+    inject: ['isDisableDay'],
     props: {
         currentDate: {},
         events: {},
         weekNames: {
             type: Array,
-            default(){
+            default() {
                 return []
             }
         },
@@ -244,7 +223,13 @@ export default {
             // mark cellIndex and place holder
             for (let i = 0; i < thisDayEvents.length; i++) {
                 thisDayEvents[i].cellIndex = thisDayEvents[i].cellIndex || i + 1
-                thisDayEvents[i].isShow = true
+
+                if (thisDayEvents[i].title === '') {
+                    thisDayEvents[i].isShow = false
+                } else {
+                    thisDayEvents[i].isShow = true
+                }
+
                 if (thisDayEvents[i].cellIndex == i + 1 || i > 2) continue
                 thisDayEvents.splice(i, 0, {
                     title: 'holder',
@@ -255,6 +240,7 @@ export default {
                 })
             }
 
+            // console.log(thisDayEvents)
             return thisDayEvents
         },
         isStart(eventDate, date) {
@@ -284,14 +270,21 @@ export default {
             }
         },
         dayClick(day, item, jsEvent) {
+            if (this.isDisableDay(day)) {
+                this.$Message.error(
+                    `日期"${dayjs(day).format('YYYY-MM-DD')}"不可编辑`
+                )
+                return
+            }
+
             let date = dayjs(day).format('YYYY-MM-DD')
-            if (this.disableDays.includes(date)) return
             if (this.clickCache.includes(date)) {
                 let index = this.clickCache.findIndex(ele => ele === date)
                 this.clickCache.splice(index, 1)
             } else {
                 this.clickCache.push(date)
             }
+
             this.$emit('dayclick', day, jsEvent)
         },
         handleBg(day) {
@@ -299,16 +292,19 @@ export default {
             return this.clickCache.includes(date)
         },
         handleDisableDay(day) {
-            let date = dayjs(day).format('YYYY-MM-DD')
-            return this.disableDays.includes(date)
+            return this.isDisableDay(day)
         },
         eventClick(event, jsEvent) {
             if (!event.isShow) {
                 return
             }
+
             jsEvent.stopPropagation()
-            let pos = this.computePos(jsEvent.target)
-            this.$emit('eventclick', event, jsEvent, pos)
+
+            if (!this.isDisableDay(event.start)) {
+                let pos = this.computePos(jsEvent.target)
+                this.$emit('eventclick', event, jsEvent, pos)
+            }
         }
     }
 }
@@ -321,7 +317,7 @@ export default {
         color: #fff;
     }
     .disableDay {
-        background: #E8E8E8;
+        background: #e8e8e8;
     }
     .weeks {
         display: flex;
