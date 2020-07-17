@@ -25,6 +25,8 @@
             :month-names="monthNames"
             :week-names="weekNames"
             :first-day="firstDay"
+            :default-selected-dates="defaultSelectedDates"
+            :selectable="selectable"
             @eventclick="emitEventClick"
             @dayclick="emitDayClick"
             @moreclick="emitMoreClick"
@@ -88,16 +90,31 @@ export default {
             type: String,
             default: dayjs().format('YYYY-MM')
         },
-
         canChangeMonth: {
             type: Boolean,
             default: true
+        },
+        /*是否可选择 */
+        selectable: {
+            type:Boolean,
+            default:true
+        },
+        defaultSelectedDates: {
+            type:Array,
+            default(){
+                return []
+            }
         }
     },
     data() {
         return {
             currentDate: new Date()
         }
+    },
+
+    mounted() {
+        console.log('--------')
+                        console.log(this.defaultSelectedDates)
     },
     methods: {
         emitChangeMonth(start, end, currentStart, current) {

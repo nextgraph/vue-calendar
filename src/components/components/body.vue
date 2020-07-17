@@ -87,26 +87,7 @@ import dayjs from 'dayjs'
 
 export default {
     inject: ['isDisableDay'],
-    props: {
-        currentDate: {},
-        events: {},
-        weekNames: {
-            type: Array,
-            default() {
-                return []
-            }
-        },
-        monthNames: {},
-        firstDay: {}
-    },
-    created() {
-        this.events.forEach((item, index) => {
-            item._id = item.id || index
-            item.end = item.end || item.start
-        })
-        // this.events = events
-    },
-    data() {
+        data() {
         return {
             // weekNames : DAY_NAMES,
             weekMask: [1, 2, 3, 4, 5, 6, 7],
@@ -119,8 +100,39 @@ export default {
                 left: 0
             },
             selectDay: {},
-            clickCache: []
+            selectedDates: [].concat(this.defaultSelectedDates)
         }
+    },
+    props: {
+        currentDate: {},
+        events: {},
+        weekNames: {
+            type: Array,
+            default() {
+                return []
+            }
+        },
+        monthNames: {},
+        firstDay: {},
+        /* 是否可选择 */
+        selectable: {
+            type:Boolean,
+            default:true
+        },
+        /*默认选中日期*/
+        defaultSelectedDates: {
+            type:Array,
+            default(){
+                return []
+            }
+        }
+    },
+    created() {
+        this.events.forEach((item, index) => {
+            item._id = item.id || index
+            item.end = item.end || item.start
+        })
+        // this.events = events
     },
     watch: {
         weekNames(val) {
@@ -229,6 +241,11 @@ export default {
                 } else {
                     thisDayEvents[i].isShow = true
                 }
+                if (thisDayEvents[i].title === '') {
+                    thisDayEvents[i].isShow = false
+                } else {
+                    thisDayEvents[i].isShow = true
+                }
 
                 if (thisDayEvents[i].cellIndex == i + 1 || i > 2) continue
                 thisDayEvents.splice(i, 0, {
@@ -271,25 +288,29 @@ export default {
         },
         dayClick(day, item, jsEvent) {
             if (this.isDisableDay(day)) {
-                this.$Message.error(
+                this.$Message.info(
                     `日期"${dayjs(day).format('YYYY-MM-DD')}"不可编辑`
                 )
                 return
             }
 
+            if (!this.selectable) {
+                return
+            }
+
             let date = dayjs(day).format('YYYY-MM-DD')
-            if (this.clickCache.includes(date)) {
-                let index = this.clickCache.findIndex(ele => ele === date)
-                this.clickCache.splice(index, 1)
+            if (this.selectedDates.includes(date)) {
+                let index = this.selectedDates.findIndex(ele => ele === date)
+                this.selectedDates.splice(index, 1)
             } else {
-                this.clickCache.push(date)
+                this.selectedDates.push(date)
             }
 
             this.$emit('dayclick', day, jsEvent)
         },
         handleBg(day) {
             let date = dayjs(day).format('YYYY-MM-DD')
-            return this.clickCache.includes(date)
+            return this.selectedDates.includes(date)
         },
         handleDisableDay(day) {
             return this.isDisableDay(day)
@@ -301,7 +322,19 @@ export default {
 
             jsEvent.stopPropagation()
 
+            if (!this.selectable) {
+                return
+            }
+
             if (!this.isDisableDay(event.start)) {
+            let date = dayjs(event.start).format('YYYY-MM-DD')
+            if (this.selectedDates.includes(date)) {
+                let index = this.selectedDates.findIndex(ele => ele === date)
+                this.selectedDates.splice(index, 1)
+            } else {
+                this.selectedDates.push(date)
+            }
+
                 let pos = this.computePos(jsEvent.target)
                 this.$emit('eventclick', event, jsEvent, pos)
             }
