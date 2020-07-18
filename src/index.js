@@ -1,4 +1,4 @@
-import VxCalendar from './components'
+import VxCalendar from './components/calendar'
 
 const install = function(Vue, opts = {}) {
     Vue.component(VxCalendar.name, VxCalendar);

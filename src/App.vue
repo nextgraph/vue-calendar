@@ -1,13 +1,9 @@
 <template>
     <div id="app">
-        <calendar currentMonth="2020-07"
-            :events="fcEvents"
-            @dayClick="dayClick"
-            ></calendar>
+        <map-base></map-base>
     </div>
 </template>
 <script>
-import Calendar from './components'
 import dayjs from 'dayjs'
 export default {
     name: 'app',
@@ -15,7 +11,7 @@ export default {
         disableDays: ['2020-07-01', '2020-07-03']
     },
     components: {
-        Calendar
+        MapBase: () => import('./components/map')
     },
     data() {
         return {
@@ -54,6 +50,10 @@ export default {
 }
 </script>
 <style>
+* {
+    padding: 0;
+    margin: 0;
+}
 html,
 body {
     width: 100%;
@@ -63,11 +63,9 @@ body {
 #app {
     width: 100%;
     height: 100%;
- }
- .plan {
-     background-color: transparent!important;
-     text-align: center;
- }
+    position: relative;
+    overflow: hidden;
+}
 
 /*.full-calendar-body .dates .week-row .day-cell {
     min-height: 0 !important;

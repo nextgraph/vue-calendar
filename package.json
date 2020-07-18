@@ -21,9 +21,12 @@
     "dayjs": "^1.8.29",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0-0",
+    "iview": "^3.5.0",
+    "leaflet": "^1.6.0",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "vue2-leaflet": "^2.5.2"
   },
   "description": "common vue.js components",
   "repository": {
