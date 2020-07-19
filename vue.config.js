@@ -8,5 +8,20 @@ module.exports = {
                 javascriptEnabled: true
             }
         }
+    },
+    devServer: {
+        port: 8080,
+        https: false,
+        open: true,
+        proxy: {
+            '/itek': {
+                target: 'http://121.199.44.59/itek',
+                // target: 'http://localhost:9999/pg-service',
+                changeOrigin: true,
+                pathRewrite: {
+                    '^/itek': ''
+                }
+            }
+        }
     }
 }

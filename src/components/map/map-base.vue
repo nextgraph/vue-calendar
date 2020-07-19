@@ -98,7 +98,7 @@ export default {
                 attributionControl: false,
                 zoomSnap: true
             },
-            zoom: 6,
+            zoom: 4,
             center: L.latLng(38, 110),
             showLayerPanel: false,
             vec,
@@ -145,6 +145,12 @@ export default {
         setMapClass(clazz) {
             this.mapClass = clazz
             this.provider = PROVIDER[this.mapType + this.mapClass]
+        },
+        resetLayerStyle(layer) {
+            this.$refs.map.mapObject.resetStyle(layer)
+        },
+        fitBounds(bounds){
+            this.$refs.map.mapObject.fitBounds(bounds)
         }
     },
 
