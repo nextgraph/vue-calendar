@@ -110,6 +110,8 @@ import Navi from './navigator'
 import vec from '@/assets/images/map/vec.jpg'
 import ter from '@/assets/images/map/ter.jpg'
 import sat from '@/assets/images/map/sat.jpg'
+import _ from 'lodash'
+
 export default {
     name: 'VxChinaMap',
     data() {
@@ -199,7 +201,7 @@ export default {
                 layer.on({
                     mouseover: this.overFeature,
                     mouseout: this.outFeature,
-                    click: this.gotoFeature
+                    click: _.throttle(this.gotoFeature, 1000)
                 })
             }
         },
@@ -335,6 +337,10 @@ export default {
     height: 100%;
     width: 100%;
 
+    .leaflet-control-attribution {
+        opacity: 0.5;
+    }
+
     &__map {
         margin: 0;
         padding: 0;
@@ -348,22 +354,23 @@ export default {
             padding: 5px;
             background: #fff;
             cursor: pointer;
-            -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px,
-                rgba(0, 0, 0, 0.02) 0 -1px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
-                0 -1px 0 rgba(0, 0, 0, 0.02);
+            background-color: #ffffff;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
             border-radius: 4px;
+            user-select: none;
         }
         .layer_panel {
             position: absolute;
             background: #fff;
             top: 0;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
             border-radius: 4px;
             padding: 10px;
             display: block;
+            user-select: none;
 
             i.close {
-                display: inline-block;
+                float: right;
                 cursor: pointer;
                 opacity: 1;
             }
@@ -372,13 +379,13 @@ export default {
                 margin: 0;
                 padding-bottom: 4px;
                 border-bottom: 1px solid #e1e1e1;
-                font-size: 14px;
+                font-size: 10px;
                 font-weight: 700;
             }
 
             .layer-items {
-                margin-top: 10px;
                 text-align: center;
+                margin-top: 10px;
 
                 a {
                     display: inline-block;
@@ -402,10 +409,10 @@ export default {
             }
 
             .map-type {
-                margin: 10px 0 0 0;
-                padding: 10px 0 0 0;
+                margin: 2px 0 0 0;
+                padding: 2px 0 0 0;
                 border-top: 1px solid #e1e1e1;
-                font-size: 14px;
+                font-size: 13px;
             }
         }
     }
@@ -415,6 +422,7 @@ export default {
         font-weight: bold;
         color: #d84315;
         text-decoration: underline;
+        pointer-events: none !important;
     }
 }
 </style>
