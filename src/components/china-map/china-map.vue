@@ -1,6 +1,13 @@
 <template>
     <div class="vx-china-map">
-        <LMap :center="center" :options="mapOptions" :zoom="4" class="vx-china-map__map" ref="map">
+        <LMap
+            :center="center"
+            :minZoom="4"
+            :maxZoom="30"
+            :options="mapOptions"
+            class="vx-china-map__map"
+            ref="map"
+        >
             <LTileLayer :minZoom="4" :subdomains="provider.Subdomains" :url="provider.layer1"></LTileLayer>
             <LTileLayer
                 :minZoom="4"
@@ -138,6 +145,10 @@ export default {
         serverUrl: {
             type: String,
             default: 'http://localhost:8080/itek'
+        },
+        /* 过滤函数 */
+        filterFunc: {
+            type: Function
         }
     },
     components: {
@@ -156,7 +167,8 @@ export default {
     computed: {
         regionOptions() {
             return {
-                onEachFeature: this.onEachFeatureFunction
+                onEachFeature: this.onEachFeatureFunction,
+                filter: this.filter
                 // filter: feature => {
                 //     if (!feature.properties.level) {
                 //         //不显示中国底图 100000
@@ -204,6 +216,13 @@ export default {
                     click: _.throttle(this.gotoFeature, 1000)
                 })
             }
+        },
+        filter() {
+            if (this.filterFunc) {
+                return this.filterFunc
+            }
+
+            return null
         },
         styleSatellite() {
             if (this.mapType === '天地图') {
@@ -358,6 +377,10 @@ export default {
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
             border-radius: 4px;
             user-select: none;
+
+            &:hover {
+                background-color: #f4f4f4;
+            }
         }
         .layer_panel {
             position: absolute;
@@ -401,9 +424,11 @@ export default {
                 img {
                     width: 74px;
                     height: 54px;
+                    border: 2px solid #ffffff;
                 }
 
-                a.active img {
+                a.active img,
+                a:hover img {
                     border: 2px solid #4185d0;
                 }
             }

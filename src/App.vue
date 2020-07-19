@@ -1,6 +1,11 @@
 <template>
     <div id="app">
-        <china-map ref="map" @select-region="selectRegion" @over-region="overRegion"></china-map>
+        <china-map
+            ref="map"
+            @select-region="selectRegion"
+            @over-region="overRegion"
+            :filter-func="filter"
+        ></china-map>
     </div>
 </template>
 <script>
@@ -59,6 +64,22 @@ export default {
         },
         overRegion(region) {
             console.log(JSON.stringify(region))
+        },
+        filter(feature) {
+            if (!feature.properties.level) {
+                //不显示中国底图 100000
+                return false
+            }
+
+            if (feature.properties.level === 'province') {
+                return (
+                    feature.properties.adcode === '510000'
+                    // feature.properties.name === '湖南省' 
+                    // feature.properties.name === '北京市'
+                )
+            } else {
+                return true
+            }
         }
     }
 }
