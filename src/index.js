@@ -1,7 +1,9 @@
 import VxCalendar from './components/calendar'
+import VxChinaMap from './components/china-map'
 
 const install = function(Vue, opts = {}) {
-    Vue.component(VxCalendar.name, VxCalendar);
+    Vue.component(VxCalendar.name, VxCalendar)
+    Vue.component(VxChinaMap.name, VxChinaMap)
 }
 
 // auto install

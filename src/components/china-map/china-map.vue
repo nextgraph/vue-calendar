@@ -1,6 +1,6 @@
 <template>
-    <div class="vx-map">
-        <LMap :center="center" :options="mapOptions" :zoom="zoom" class="map" ref="map">
+    <div class="vx-china-map">
+        <LMap :center="center" :options="mapOptions" :zoom="4" class="vx-china-map__map" ref="map">
             <LTileLayer :minZoom="4" :subdomains="provider.Subdomains" :url="provider.layer1"></LTileLayer>
             <LTileLayer
                 :minZoom="4"
@@ -8,15 +8,33 @@
                 :url="provider.layer2"
                 v-if="provider.layer2"
             ></LTileLayer>
+            <LLayerGroup>
+                <LGeoJson
+                    ref="region"
+                    :geojson="regionJson"
+                    :options-style="regionStyleFunc"
+                    :options="regionOptions"
+                />
+                <LMarker
+                    v-for="(name,index) in regionNames"
+                    :key="index"
+                    :lat-lng="name.center"
+                    :options="name.options"
+                >
+                    <LIcon class-name="vx-china-map__region-name" :icon-size="[100,18]">
+                        <div>{{name.html}}</div>
+                    </LIcon>
+                </LMarker>
+            </LLayerGroup>
             <LControlScale :imperial="false" position="bottomleft"></LControlScale>
             <LControlZoom position="topleft" />
             <LControl :position="'topleft'">
-                <div style="margin-left: 44px;margin-top: -74px;">
+                <div style="margin-left: 44px;margin-top: -60px;">
+                    <Navi @go-region="goRegion" :items="items"></Navi>
                     <slot name="topleft-extra"></slot>
                 </div>
             </LControl>
             <LControlAttribution position="bottomright" prefix="iTek-china" />
-            <slot></slot>
             <LControl position="topright">
                 <slot name="info"></slot>
                 <div @dblclick.stop class="layer_switch">
@@ -68,6 +86,7 @@
                     </div>
                 </div>
             </LControl>
+            <slot></slot>
         </LMap>
     </div>
 </template>
@@ -76,45 +95,114 @@ import 'leaflet/dist/leaflet.css'
 import {
     LMap,
     LTileLayer,
+    LGeoJson,
     LControlScale,
     LControlAttribution,
     LControlZoom,
-    LControl
+    LControl,
+    LMarker,
+    LLayerGroup,
+    LIcon
 } from 'vue2-leaflet'
 
 import PROVIDER from './provider'
+import Navi from './navigator'
 import vec from '@/assets/images/map/vec.jpg'
 import ter from '@/assets/images/map/ter.jpg'
 import sat from '@/assets/images/map/sat.jpg'
 export default {
-    name: 'VxMap',
+    name: 'VxChinaMap',
     data() {
         return {
-            provider: '',
-            mapType: '谷歌',
+            provider: PROVIDER['高德1'],
+            mapType: '高德',
+            regionJson: [],
             mapClass: 1,
             mapOptions: {
                 zoomControl: false,
                 attributionControl: false,
                 zoomSnap: true
             },
-            zoom: 4,
             center: L.latLng(38, 110),
             showLayerPanel: false,
             vec,
             ter,
-            sat
+            sat,
+            items: []
+        }
+    },
+    props: {
+        /* 服务地址 */
+        serverUrl: {
+            type: String,
+            default: 'http://localhost:8080/itek'
         }
     },
     components: {
         LMap,
         LTileLayer,
+        LGeoJson,
         LControlScale,
         LControl,
         LControlAttribution,
-        LControlZoom
+        LControlZoom,
+        LLayerGroup,
+        LMarker,
+        LIcon,
+        Navi
     },
     computed: {
+        regionOptions() {
+            return {
+                onEachFeature: this.onEachFeatureFunction
+                // filter: feature => {
+                //     if (!feature.properties.level) {
+                //         //不显示中国底图 100000
+                //         return false
+                //     }
+
+                //     // if (feature.properties.level === 'province') {
+                //     //     return (
+                //     //         feature.properties.adcode === '510000' ||
+                //     //         feature.properties.name === '湖南省'
+                //     //     )
+                //     // } else {
+                //     //     return true
+                //     // }
+
+                //     return true
+                // }
+            }
+        },
+        regionNames() {
+            if (!this.regionJson.features) {
+                return []
+            }
+
+            let regionNames = this.regionJson.features
+                .filter(element => {
+                    return !!element.properties.center
+                })
+                .map(element => {
+                    return {
+                        center: L.GeoJSON.coordsToLatLng(
+                            element.properties.center
+                        ),
+                        html: element.properties.name
+                    }
+                })
+
+            return regionNames
+        },
+        onEachFeatureFunction() {
+            return (feature, layer) => {
+                layer.on({
+                    mouseover: this.overFeature,
+                    mouseout: this.outFeature,
+                    click: this.gotoFeature
+                })
+            }
+        },
         styleSatellite() {
             if (this.mapType === '天地图') {
                 return {
@@ -146,30 +234,108 @@ export default {
             this.mapClass = clazz
             this.provider = PROVIDER[this.mapType + this.mapClass]
         },
-        resetLayerStyle(layer) {
-            this.$refs.map.mapObject.resetStyle(layer)
+
+        /* 跳转到指定区域 */
+        goRegion(item) {
+            this.showFeature(item.code, item.name, item.level)
         },
-        fitBounds(bounds){
-            this.$refs.map.mapObject.fitBounds(bounds)
+
+        /* 填充行政区划样式 */
+        regionStyleFunc(feature) {
+            return {
+                weight: 1
+            }
+        },
+
+        /* 初始化中国地图 */
+        initMap() {
+            this.showFeature('100000', '全国', 'country')
+        },
+
+        /*
+         * 显示Feature
+         */
+        showFeature(code, name, level) {
+            const url = `${this.serverUrl}/${code}_full.json`
+            fetch(url).then(res => {
+                res.json().then(json => {
+                    this.regionJson = json
+
+                    const index = this.items.findIndex(item => {
+                        return item.code === code
+                    })
+
+                    let item
+                    if (index === -1) {
+                        item = {
+                            code: code,
+                            name: name,
+                            level: level
+                        }
+                        this.items.push(item)
+                    } else {
+                        item = this.items[index]
+
+                        // 删除指定项后面的元素
+                        this.items.splice(index + 1)
+                    }
+
+                    this.$nextTick(_ => {
+                        this.$refs.map.fitBounds(this.$refs.region.getBounds())
+                    })
+
+                    this.$emit('select-region', item)
+                })
+            })
+        },
+
+        /* 鼠标移到Feature上 */
+        overFeature(e) {
+            const layer = e.target
+            layer.setStyle({
+                weight: 3,
+                fillOpacity: 0.8
+            })
+
+            const properties = layer.feature.properties
+            this.$emit('over-region', {
+                code: properties.adcode,
+                name: properties.name,
+                level: properties.level
+            })
+        },
+        /* 鼠标离开Feature */
+        outFeature(e) {
+            this.$refs.region.mapObject.resetStyle(e.target)
+        },
+        /* 跳转Feature */
+        gotoFeature(e) {
+            const layer = e.target
+            if (layer.feature.properties.level === 'district') {
+                return
+            }
+
+            const adcode = layer.feature.properties.adcode
+            const name = layer.feature.properties.name
+            const level = layer.feature.properties.level
+
+            this.showFeature(adcode, name, level)
         }
     },
 
     created() {
-        this.provider = PROVIDER['高德1']
-        this.mapType = '高德'
+        this.initMap()
     }
 }
 </script>
 <style lang="less">
-.vx-map {
+.vx-china-map {
     padding: 0;
     margin: 0;
     height: 100%;
     width: 100%;
-    // position: relative;
-    // overflow: hidden;
 
-    .map {
+    &__map {
         margin: 0;
         padding: 0;
         height: 100%;
@@ -197,7 +363,6 @@ export default {
             display: block;
 
             i.close {
-                float: right;
                 display: inline-block;
                 cursor: pointer;
                 opacity: 1;
@@ -243,6 +408,13 @@ export default {
                 font-size: 14px;
             }
         }
+    }
+
+    &__region-name {
+        text-align: center;
+        font-weight: bold;
+        color: #d84315;
+        text-decoration: underline;
     }
 }
 </style>
