@@ -2,6 +2,7 @@
     <div id="app">
         <china-map
             ref="map"
+            globalName="花冠酒业"
             @select-region="selectRegion"
             @over-region="overRegion"
             :filter-func="filter"
@@ -74,7 +75,7 @@ export default {
             if (feature.properties.level === 'province') {
                 return (
                     feature.properties.adcode === '510000'
-                    // feature.properties.name === '湖南省' 
+                    // feature.properties.name === '湖南省'
                     // feature.properties.name === '北京市'
                 )
             } else {

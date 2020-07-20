@@ -141,6 +141,13 @@ export default {
         }
     },
     props: {
+        /*
+         * 全局名称
+         */
+        globalName: {
+            type: String,
+            default: '全国'
+        },
         /* 服务地址 */
         serverUrl: {
             type: String,
@@ -169,23 +176,6 @@ export default {
             return {
                 onEachFeature: this.onEachFeatureFunction,
                 filter: this.filter
-                // filter: feature => {
-                //     if (!feature.properties.level) {
-                //         //不显示中国底图 100000
-                //         return false
-                //     }
-
-                //     // if (feature.properties.level === 'province') {
-                //     //     return (
-                //     //         feature.properties.adcode === '510000' ||
-                //     //         feature.properties.name === '湖南省'
-                //     //     )
-                //     // } else {
-                //     //     return true
-                //     // }
-
-                //     return true
-                // }
             }
         },
         regionNames() {
@@ -270,7 +260,7 @@ export default {
 
         /* 初始化中国地图 */
         initMap() {
-            this.showFeature('100000', '全国', 'country')
+            this.showFeature('100000', this.globalName, 'country')
         },
 
         /*
