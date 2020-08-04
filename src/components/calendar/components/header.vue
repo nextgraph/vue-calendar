@@ -19,6 +19,8 @@ import dayjs from 'dayjs'
 
 export default {
     created() {
+        console.log(this.currentMonth + '-02')
+        console.log(dayjs(this.currentMonth + '-02').month() ,dayjs().month())
         this.dispatchEvent()
     },
     props: {
@@ -47,6 +49,7 @@ export default {
             console.log('currentDate', val)
         }
     },
+
     methods: {
         // goPrev() {
         //     if (!this.canChangeMonth) return
@@ -59,8 +62,7 @@ export default {
         //     this.dispatchEvent()
         // },
         changeMonth(date, num) {
-            let dt = new Date(date)
-            return new Date(dt.setMonth(dt.getMonth() + num))
+            return dayjs(date).add(num, 'month').toDate()
         },
         dispatchEvent() {
             console.log('dispatchEvent')
