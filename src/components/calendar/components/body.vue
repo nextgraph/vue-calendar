@@ -137,6 +137,9 @@ export default {
     watch: {
         weekNames(val) {
             console.log('watch weekNames', val)
+        },
+        defaultSelectedDates(newVal) {
+            this.selectedDates = [].concat(newVal)
         }
     },
     computed: {
