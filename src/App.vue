@@ -74,10 +74,11 @@ export default {
 
             if (feature.properties.level === 'province') {
                 return (
-                    feature.properties.adcode === '510000'
-                    // feature.properties.name === '湖南省'
-                    // feature.properties.name === '北京市'
+                    // feature.properties.adcode === '510000'
+                    feature.properties.name === '湖南省',
+                    feature.properties.name === '北京市'
                 )
+                // return false
             } else {
                 return true
             }
