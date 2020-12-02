@@ -114,9 +114,9 @@ import {
 
 import PROVIDER from './provider'
 import Navi from './navigator'
-import vec from '@/assets/images/map/vec.jpg'
-import ter from '@/assets/images/map/ter.jpg'
-import sat from '@/assets/images/map/sat.jpg'
+import vec from '../../assets/images/map/vec.jpg'
+import ter from '../../assets/images/map/ter.jpg'
+import sat from '../../assets/images/map/sat.jpg'
 import _ from 'lodash'
 
 export default {
