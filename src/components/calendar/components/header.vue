@@ -39,7 +39,7 @@ export default {
             title: '',
             leftArrow: '<',
             rightArrow: '>',
-            headDate: this.changeMonth(new Date(), dayjs(this.currentMonth + '-02').month() - dayjs().month())
+            headDate: this.changeMonth(this.currentMonth, dayjs(this.currentMonth + '-02').month() - dayjs().month())
         }
     },
     watch: {
@@ -61,11 +61,10 @@ export default {
         //     this.headDate = this.changeMonth(this.headDate, 1)
         //     this.dispatchEvent()
         // },
-        changeMonth(date, num) {
-            return dayjs(date).add(num, 'month').toDate()
+        changeMonth(date) {
+            return dayjs(date).add(0, 'month').toDate()
         },
         dispatchEvent() {
-            console.log('dispatchEvent')
             this.title = dateFunc.format(
                 this.headDate,
                 this.titleFormat,
